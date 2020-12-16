@@ -4,6 +4,9 @@ import sys
 import socket
 from serdes import *
 
+print "server starting"
+
+
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.bind(('', UDP_PORT))
 
