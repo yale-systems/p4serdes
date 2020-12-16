@@ -17,16 +17,18 @@ addr = (host, UDP_PORT)
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.settimeout(2)
 
-req = varIntC.pack(key)
-s.sendto(req, addr)
+msg = varIntC.pack(key)
+s.sendto(msg, addr)
 
-res, addr2 = s.recvfrom(1024)
+print "sent msg"
 
-b1, b2, b3 = varIntProto.unpack(res)
-
-print b1
-print b2
-print b3
+#res, addr2 = s.recvfrom(1024)
+#
+#b1, b2, b3 = varIntProto.unpack(res)
+#
+#print b1
+#print b2
+#print b3
 
 
 
