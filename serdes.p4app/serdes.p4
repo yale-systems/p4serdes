@@ -136,11 +136,6 @@ control MyIngress(inout headers hdr,
              hdr.msg.number = hdr.msg.number >> 7;
              size = size + 1;
          }
-         if (hdr.msg.number > 127) {
-             hdr.proto.b4 = ((bit<8>)hdr.msg.number & 127) | 128;
-             hdr.msg.number = hdr.msg.number >> 7;
-             size = size + 1;
-         }
          if (size == 0) {
              hdr.proto.b1 = (bit<8>)hdr.msg.number & 127;
          }
