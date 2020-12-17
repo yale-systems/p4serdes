@@ -33,7 +33,7 @@ header ipv4_t {
 header udp_t {
     bit<16> srcPort;
     bit<16> dstPort;
-    bit<16> length_;
+    bit<16> len;
     bit<16> checksum;
 }
 
@@ -153,8 +153,11 @@ control MyIngress(inout headers hdr,
          if (size == 3) {
              hdr.proto.b4 = (bit<8>)hdr.msg.number & 127;
          }
-         hdr.proto.outputSize = size;
+         hdr.proto.outputSize = size + 1;
          hdr.msg.setInvalid();
+         hdr.ipv4.totalLen = 20 + 8 + 8;
+         hdr.udp.len = 8 + 8;
+         hdr.udp.checksum = 0;
 
      }
     
