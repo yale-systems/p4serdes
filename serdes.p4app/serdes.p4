@@ -39,11 +39,14 @@ header udp_t {
 
 header var_int_c_t {
     bit<32>  number;
-    bit<32> outputSize;
 }
 
 header var_int_proto_t {
+    bit<32> outputSize;
     bit<8>  b1;
+    bit<8>  b2;
+    bit<8>  b3;
+    bit<8>  b4;
 }
 
 struct metadata { }
@@ -54,7 +57,7 @@ struct headers {
     ipv4_t           ipv4;
     udp_t            udp;
     var_int_c_t      msg;
-    var_int_proto_t[8]  proto;
+    var_int_proto_t  proto;
 }
 
 parser MyParser(packet_in packet,
@@ -113,7 +116,47 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
+     }
+
+     action encode() {
+         hdr.proto.setValid();
+         bit<32> size = 0;
+         if (hdr.msg.number > 127) {
+             hdr.proto.b1 = ((bit<8>)hdr.msg.number & 127) | 128;
+             hdr.msg.number = hdr.msg.number >> 7;
+             size = size + 1;
+         }
+         if (hdr.msg.number > 127) {
+             hdr.proto.b2 = ((bit<8>)hdr.msg.number & 127) | 128;
+             hdr.msg.number = hdr.msg.number >> 7;
+             size = size + 1;
+         }
+         if (hdr.msg.number > 127) {
+             hdr.proto.b3 = ((bit<8>)hdr.msg.number & 127) | 128;
+             hdr.msg.number = hdr.msg.number >> 7;
+             size = size + 1;
+         }
+         if (hdr.msg.number > 127) {
+             hdr.proto.b4 = ((bit<8>)hdr.msg.number & 127) | 128;
+             hdr.msg.number = hdr.msg.number >> 7;
+             size = size + 1;
+         }
+         if (size == 0) {
+             hdr.proto.b1 = (bit<8>)hdr.msg.number & 127;
+         }
+         if (size == 1) {
+             hdr.proto.b2 = (bit<8>)hdr.msg.number & 127;
+         }
+         if (size == 2) {
+             hdr.proto.b3 = (bit<8>)hdr.msg.number & 127;
+         }
+         if (size == 3) {
+             hdr.proto.b4 = (bit<8>)hdr.msg.number & 127;
+         }
+         hdr.proto.outputSize = size;
+         hdr.msg.setInvalid();
+
+     }
     
      table ipv4_lpm {
         key = {
@@ -131,6 +174,7 @@ control MyIngress(inout headers hdr,
   apply {
       if(hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
+            encode();
       } 
   }
 }
@@ -162,7 +206,13 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
-    apply { }
+    apply {
+    packet.emit(hdr.ethernet);
+    packet.emit(hdr.ipv4);
+    packet.emit(hdr.udp);
+    packet.emit(hdr.msg);
+    packet.emit(hdr.proto);
+ }
 }
 
 V1Switch(

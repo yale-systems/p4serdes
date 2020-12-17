@@ -13,8 +13,8 @@ s.bind(('', UDP_PORT))
 while True:
     print "."
     msg, addr = s.recvfrom(1024)
-    value = varIntC.unpack(msg)
+    size, b1, b2, b3, b4 = varIntC.unpack(msg)
 
-    print addr, "-> msg(%d),"%value
+    print addr, "-> msg(%d %x %x %x %x)," % (size, b1, b2, b3, b4)
 
 
