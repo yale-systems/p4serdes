@@ -20,7 +20,7 @@ addr = (host, UDP_PORT)
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.settimeout(2)
 
-msg = varIntC.pack(150)
+msg = varIntC.pack(150,0)
 print bytes(msg)
 s.sendto(msg, addr)
 

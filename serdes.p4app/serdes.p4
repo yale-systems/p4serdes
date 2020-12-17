@@ -38,14 +38,12 @@ header udp_t {
 }
 
 header var_int_c_t {
-    bit<32>  key;
+    bit<32>  number;
+    bit<32> outputSize;
 }
 
 header var_int_proto_t {
     bit<8>  b1;
-    bit<8>  b2;
-    bit<8>  b3;
-
 }
 
 struct metadata { }
@@ -56,7 +54,7 @@ struct headers {
     ipv4_t           ipv4;
     udp_t            udp;
     var_int_c_t      msg;
-    var_int_proto_t  proto;
+    var_int_proto_t[8]  proto;
 }
 
 parser MyParser(packet_in packet,
